@@ -294,18 +294,14 @@ h2 {
 
 /* =====================================================
    문제 데이터
-   =====================================================
-
-   앞으로 문제를 추가할 때
-   이 부분에 문제를 추가하면 됩니다.
-
 ===================================================== */
-
 
 const questions = [
 
 
-/* ---------- 기출 : 식용작물 ---------- */
+/* =====================================================
+   기출 - 식용작물
+===================================================== */
 
 {
     id: 1,
@@ -313,6 +309,8 @@ const questions = [
     section: "기출",
 
     subject: "식용작물",
+
+    unit: "",
 
     examType: "국가직",
 
@@ -344,6 +342,8 @@ const questions = [
 
     subject: "식용작물",
 
+    unit: "",
+
     examType: "국가직",
 
     year: "2024",
@@ -374,6 +374,8 @@ const questions = [
 
     subject: "식용작물",
 
+    unit: "",
+
     examType: "지방직",
 
     year: "2025",
@@ -397,7 +399,9 @@ const questions = [
 },
 
 
-/* ---------- 기출 : 재배학개론 ---------- */
+/* =====================================================
+   기출 - 재배학개론
+===================================================== */
 
 {
     id: 4,
@@ -405,6 +409,8 @@ const questions = [
     section: "기출",
 
     subject: "재배학개론",
+
+    unit: "",
 
     examType: "국가직",
 
@@ -429,7 +435,9 @@ const questions = [
 },
 
 
-/* ---------- 이론 : 식용작물 ---------- */
+/* =====================================================
+   이론 - 식용작물 - 벼
+===================================================== */
 
 {
     id: 5,
@@ -438,6 +446,8 @@ const questions = [
 
     subject: "식용작물",
 
+    unit: "벼",
+
     examType: "",
 
     year: "",
@@ -445,7 +455,7 @@ const questions = [
     number: "이론 1번",
 
     question:
-        "식용작물 이론 예시 문제입니다.",
+        "벼 이론 예시 문제입니다.",
 
     choices: [
         "첫 번째 선지",
@@ -461,14 +471,54 @@ const questions = [
 },
 
 
-/* ---------- 이론 : 재배학개론 ---------- */
+/* =====================================================
+   이론 - 식용작물 - 보리
+===================================================== */
 
 {
     id: 6,
 
     section: "이론",
 
+    subject: "식용작물",
+
+    unit: "보리",
+
+    examType: "",
+
+    year: "",
+
+    number: "이론 2번",
+
+    question:
+        "보리 이론 예시 문제입니다.",
+
+    choices: [
+        "첫 번째 선지",
+        "두 번째 선지",
+        "세 번째 선지",
+        "네 번째 선지"
+    ],
+
+    answer: 0,
+
+    explanation:
+        "해설을 입력하세요."
+},
+
+
+/* =====================================================
+   이론 - 재배학개론 - 작물의 분류
+===================================================== */
+
+{
+    id: 7,
+
+    section: "이론",
+
     subject: "재배학개론",
+
+    unit: "작물의 분류",
 
     examType: "",
 
@@ -477,7 +527,7 @@ const questions = [
     number: "이론 1번",
 
     question:
-        "재배학개론 이론 예시 문제입니다.",
+        "작물의 분류 이론 예시 문제입니다.",
 
     choices: [
         "첫 번째 선지",
@@ -559,7 +609,6 @@ function showHome(type) {
    과목 → 시험종류 → 연도 → 문제
 ===================================================== */
 
-
 function showPastSubjects() {
 
     const subjects = [...new Set(
@@ -605,11 +654,6 @@ function showPastSubjects() {
 }
 
 
-
-/* =====================================================
-   기출
-   과목 → 시험종류
-===================================================== */
 
 function showExamTypes(subject) {
 
@@ -674,11 +718,6 @@ function showExamTypes(subject) {
 }
 
 
-
-/* =====================================================
-   기출
-   시험종류 → 연도
-===================================================== */
 
 function showYears(subject, examType) {
 
@@ -748,11 +787,6 @@ function showYears(subject, examType) {
 }
 
 
-
-/* =====================================================
-   기출
-   연도 → 문제
-===================================================== */
 
 function showQuestions(
     subject,
@@ -824,7 +858,7 @@ function showQuestions(
 
 /* =====================================================
    이론
-   과목 → 문제
+   과목 → 단원 → 문제
 ===================================================== */
 
 function showTheorySubjects() {
@@ -855,7 +889,7 @@ function showTheorySubjects() {
 
             class="menu-button"
 
-            onclick="showTheoryQuestions(
+            onclick="showTheoryUnits(
                 '${subject}'
             )">
 
@@ -876,15 +910,31 @@ function showTheorySubjects() {
 
 
 
-function showTheoryQuestions(subject) {
+/* =====================================================
+   이론
+   과목 → 단원
+===================================================== */
 
-    const list = questions.filter(q =>
+function showTheoryUnits(subject) {
 
-        q.section === "이론" &&
+    const units = [...new Set(
 
-        q.subject === subject
+        questions
 
-    );
+            .filter(q =>
+                q.section === "이론" &&
+                q.subject === subject
+            )
+
+            .map(q =>
+                q.unit
+            )
+
+            .filter(unit =>
+                unit !== ""
+            )
+
+    )];
 
 
     let html = `
@@ -900,6 +950,78 @@ function showTheoryQuestions(subject) {
         </button>
 
         <h2>${subject}</h2>
+
+    `;
+
+
+    units.forEach(unit => {
+
+        html += `
+
+        <button
+
+            class="menu-button"
+
+            onclick="showTheoryQuestions(
+                '${subject}',
+                '${unit}'
+            )">
+
+            📂 ${unit}
+
+        </button>
+
+        `;
+
+    });
+
+
+    document
+        .getElementById("theoryContent")
+        .innerHTML = html;
+
+}
+
+
+
+/* =====================================================
+   이론
+   단원 → 문제
+===================================================== */
+
+function showTheoryQuestions(
+    subject,
+    unit
+) {
+
+    const list = questions.filter(q =>
+
+        q.section === "이론" &&
+
+        q.subject === subject &&
+
+        q.unit === unit
+
+    );
+
+
+    let html = `
+
+        <button
+
+            class="back-button"
+
+            onclick="showTheoryUnits(
+                '${subject}'
+            )">
+
+            ← 단원
+
+        </button>
+
+        <h2>
+            ${unit}
+        </h2>
 
     `;
 
@@ -1041,7 +1163,7 @@ function openQuestion(id) {
 
 
 /* =====================================================
-   문제를 풀고 난 뒤
+   문제 풀이
 ===================================================== */
 
 function answerQuestion(
@@ -1086,8 +1208,6 @@ function answerQuestion(
         );
 
 
-    /* 정답 */
-
     if (
         selectedIndex ===
         q.answer
@@ -1098,9 +1218,6 @@ function answerQuestion(
             .add("correct");
 
     }
-
-
-    /* 오답 */
 
     else {
 
@@ -1213,7 +1330,6 @@ function showWrong() {
         `;
 
     }
-
 
     else {
 
@@ -1346,6 +1462,43 @@ function openWrongQuestion(id) {
     document
         .getElementById("wrongContent")
         .innerHTML = html;
+
+}
+
+
+
+/* =====================================================
+   문제 목록으로 돌아가기
+===================================================== */
+
+function goBackToList() {
+
+    if (
+        window.currentQuestion &&
+        window.currentQuestion.section === "이론"
+    ) {
+
+        showTheoryUnits(
+            window.currentQuestion.subject
+        );
+
+    }
+
+    else if (
+        window.currentQuestion
+    ) {
+
+        showQuestions(
+
+            window.currentQuestion.subject,
+
+            window.currentQuestion.examType,
+
+            window.currentQuestion.year
+
+        );
+
+    }
 
 }
 
