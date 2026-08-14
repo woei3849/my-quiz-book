@@ -77,42 +77,28 @@ h2 {
 .menu-button {
     width: 100%;
     text-align: left;
-
     padding: 17px;
-
     margin-bottom: 10px;
-
     border: 1px solid #ddd;
-
     border-radius: 12px;
-
     background: white;
-
     font-size: 17px;
-
     font-weight: 600;
 }
 
 .back-button {
     border: none;
     background: transparent;
-
     padding: 8px 0;
-
     font-size: 16px;
-
     color: #555;
 }
 
 .card {
     background: white;
-
     border-radius: 14px;
-
     padding: 18px;
-
     margin-bottom: 12px;
-
     box-shadow:
         0 2px 8px rgba(0,0,0,0.05);
 }
@@ -120,57 +106,39 @@ h2 {
 .question-number {
     font-size: 14px;
     color: #777;
-
     margin-bottom: 12px;
 }
 
 .question-text {
     font-size: 19px;
-
     line-height: 1.6;
-
     font-weight: 600;
-
     margin-bottom: 18px;
 }
 
 .choice {
     width: 100%;
-
     padding: 15px;
-
     margin-bottom: 9px;
-
     border: 1px solid #bbb;
-
     border-radius: 10px;
-
     background: white;
-
     color: #222;
-
     text-align: left;
-
     font-size: 16px;
 }
 
 .choice.correct {
     background: #dbeafe;
-
     border-color: #3b82f6;
-
     color: #1d4ed8;
-
     font-weight: bold;
 }
 
 .choice.wrong {
     background: #fee2e2;
-
     border-color: #ef4444;
-
     color: #dc2626;
-
     font-weight: bold;
 }
 
@@ -180,33 +148,23 @@ h2 {
 
 .answer-label {
     margin-top: 15px;
-
     padding: 12px;
-
     border-radius: 10px;
-
     background: #f1f5f9;
 }
 
 .explanation {
     margin-top: 15px;
-
     padding: 16px;
-
     background: #fafafa;
-
     border-radius: 10px;
-
     line-height: 1.6;
-
     border-left: 4px solid #888;
 }
 
 .empty {
     text-align: center;
-
     color: #777;
-
     padding: 40px 10px;
 }
 
@@ -244,10 +202,6 @@ h2 {
 <main>
 
 
-<!-- =========================
-     기출
-========================= -->
-
 <section id="pastScreen"
          class="screen active">
 
@@ -258,10 +212,6 @@ h2 {
 </section>
 
 
-<!-- =========================
-     이론
-========================= -->
-
 <section id="theoryScreen"
          class="screen">
 
@@ -271,10 +221,6 @@ h2 {
 
 </section>
 
-
-<!-- =========================
-     오답
-========================= -->
 
 <section id="wrongScreen"
          class="screen">
@@ -289,277 +235,21 @@ h2 {
 </main>
 
 
+<!-- ★ 문제 데이터 파일 -->
+
+<script src="questions.js"></script>
+
+
+<!-- ★ 문제집 기능 -->
+
 <script>
 
-
-/* =====================================================
-   문제 데이터
-===================================================== */
-
-const questions = [
-
-
-/* =====================================================
-   기출 - 식용작물
-===================================================== */
-
-{
-    id: 1,
-
-    section: "기출",
-
-    subject: "식용작물",
-
-    unit: "",
-
-    examType: "국가직",
-
-    year: "2025",
-
-    number: "2025년 국가직 1번",
-
-    question:
-        "다음 중 비래해충이 아닌 것은?",
-
-    choices: [
-        "벼멸구",
-        "흰등멸구",
-        "혹명나방",
-        "쌀바구미"
-    ],
-
-    answer: 3,
-
-    explanation:
-        "비래해충은 벼멸구, 흰등멸구, 혹명나방이므로 답은 쌀바구미이다."
-},
-
-
-{
-    id: 2,
-
-    section: "기출",
-
-    subject: "식용작물",
-
-    unit: "",
-
-    examType: "국가직",
-
-    year: "2024",
-
-    number: "2024년 국가직 1번",
-
-    question:
-        "식용작물 예시 문제입니다.",
-
-    choices: [
-        "첫 번째 선지",
-        "두 번째 선지",
-        "세 번째 선지",
-        "네 번째 선지"
-    ],
-
-    answer: 0,
-
-    explanation:
-        "해설을 입력하세요."
-},
-
-
-{
-    id: 3,
-
-    section: "기출",
-
-    subject: "식용작물",
-
-    unit: "",
-
-    examType: "지방직",
-
-    year: "2025",
-
-    number: "2025년 지방직 1번",
-
-    question:
-        "지방직 식용작물 예시 문제입니다.",
-
-    choices: [
-        "첫 번째 선지",
-        "두 번째 선지",
-        "세 번째 선지",
-        "네 번째 선지"
-    ],
-
-    answer: 1,
-
-    explanation:
-        "해설을 입력하세요."
-},
-
-
-/* =====================================================
-   기출 - 재배학개론
-===================================================== */
-
-{
-    id: 4,
-
-    section: "기출",
-
-    subject: "재배학개론",
-
-    unit: "",
-
-    examType: "국가직",
-
-    year: "2025",
-
-    number: "2025년 국가직 1번",
-
-    question:
-        "재배학개론 예시 문제입니다.",
-
-    choices: [
-        "첫 번째 선지",
-        "두 번째 선지",
-        "세 번째 선지",
-        "네 번째 선지"
-    ],
-
-    answer: 1,
-
-    explanation:
-        "해설을 입력하세요."
-},
-
-
-/* =====================================================
-   이론 - 식용작물 - 벼
-===================================================== */
-
-{
-    id: 5,
-
-    section: "이론",
-
-    subject: "식용작물",
-
-    unit: "벼",
-
-    examType: "",
-
-    year: "",
-
-    number: "이론 1번",
-
-    question:
-        "벼 이론 예시 문제입니다.",
-
-    choices: [
-        "첫 번째 선지",
-        "두 번째 선지",
-        "세 번째 선지",
-        "네 번째 선지"
-    ],
-
-    answer: 2,
-
-    explanation:
-        "해설을 입력하세요."
-},
-
-
-/* =====================================================
-   이론 - 식용작물 - 보리
-===================================================== */
-
-{
-    id: 6,
-
-    section: "이론",
-
-    subject: "식용작물",
-
-    unit: "보리",
-
-    examType: "",
-
-    year: "",
-
-    number: "이론 2번",
-
-    question:
-        "보리 이론 예시 문제입니다.",
-
-    choices: [
-        "첫 번째 선지",
-        "두 번째 선지",
-        "세 번째 선지",
-        "네 번째 선지"
-    ],
-
-    answer: 0,
-
-    explanation:
-        "해설을 입력하세요."
-},
-
-
-/* =====================================================
-   이론 - 재배학개론 - 작물의 분류
-===================================================== */
-
-{
-    id: 7,
-
-    section: "이론",
-
-    subject: "재배학개론",
-
-    unit: "작물의 분류",
-
-    examType: "",
-
-    year: "",
-
-    number: "이론 1번",
-
-    question:
-        "작물의 분류 이론 예시 문제입니다.",
-
-    choices: [
-        "첫 번째 선지",
-        "두 번째 선지",
-        "세 번째 선지",
-        "네 번째 선지"
-    ],
-
-    answer: 0,
-
-    explanation:
-        "해설을 입력하세요."
-}
-
-];
-
-
-
-/* =====================================================
-   오답 저장
-===================================================== */
 
 let wrongAnswers =
     JSON.parse(
         localStorage.getItem("wrongAnswers")
     ) || [];
 
-
-
-/* =====================================================
-   화면 전환
-===================================================== */
 
 function hideScreens() {
 
@@ -603,11 +293,6 @@ function showHome(type) {
 }
 
 
-
-/* =====================================================
-   기출
-   과목 → 시험종류 → 연도 → 문제
-===================================================== */
 
 function showPastSubjects() {
 
@@ -694,7 +379,6 @@ function showExamTypes(subject) {
         html += `
 
         <button
-
             class="menu-button"
 
             onclick="showYears(
@@ -719,7 +403,10 @@ function showExamTypes(subject) {
 
 
 
-function showYears(subject, examType) {
+function showYears(
+    subject,
+    examType
+) {
 
     const years = [...new Set(
 
@@ -741,10 +428,11 @@ function showYears(subject, examType) {
     let html = `
 
         <button
-
             class="back-button"
 
-            onclick="showExamTypes('${subject}')">
+            onclick="showExamTypes(
+                '${subject}'
+            )">
 
             ← 시험종류
 
@@ -762,7 +450,6 @@ function showYears(subject, examType) {
         html += `
 
         <button
-
             class="menu-button"
 
             onclick="showQuestions(
@@ -810,7 +497,6 @@ function showQuestions(
     let html = `
 
         <button
-
             class="back-button"
 
             onclick="showYears(
@@ -834,7 +520,6 @@ function showQuestions(
         html += `
 
         <button
-
             class="menu-button"
 
             onclick="openQuestion(${q.id})">
@@ -855,11 +540,6 @@ function showQuestions(
 }
 
 
-
-/* =====================================================
-   이론
-   과목 → 단원 → 문제
-===================================================== */
 
 function showTheorySubjects() {
 
@@ -886,7 +566,6 @@ function showTheorySubjects() {
         html += `
 
         <button
-
             class="menu-button"
 
             onclick="showTheoryUnits(
@@ -909,11 +588,6 @@ function showTheorySubjects() {
 }
 
 
-
-/* =====================================================
-   이론
-   과목 → 단원
-===================================================== */
 
 function showTheoryUnits(subject) {
 
@@ -940,7 +614,6 @@ function showTheoryUnits(subject) {
     let html = `
 
         <button
-
             class="back-button"
 
             onclick="showTheorySubjects()">
@@ -959,7 +632,6 @@ function showTheoryUnits(subject) {
         html += `
 
         <button
-
             class="menu-button"
 
             onclick="showTheoryQuestions(
@@ -984,11 +656,6 @@ function showTheoryUnits(subject) {
 
 
 
-/* =====================================================
-   이론
-   단원 → 문제
-===================================================== */
-
 function showTheoryQuestions(
     subject,
     unit
@@ -1008,7 +675,6 @@ function showTheoryQuestions(
     let html = `
 
         <button
-
             class="back-button"
 
             onclick="showTheoryUnits(
@@ -1019,9 +685,7 @@ function showTheoryQuestions(
 
         </button>
 
-        <h2>
-            ${unit}
-        </h2>
+        <h2>${unit}</h2>
 
     `;
 
@@ -1031,7 +695,6 @@ function showTheoryQuestions(
         html += `
 
         <button
-
             class="menu-button"
 
             onclick="openQuestion(${q.id})">
@@ -1053,10 +716,6 @@ function showTheoryQuestions(
 
 
 
-/* =====================================================
-   문제 열기
-===================================================== */
-
 function openQuestion(id) {
 
     const q =
@@ -1072,7 +731,6 @@ function openQuestion(id) {
     let html = `
 
         <button
-
             class="back-button"
 
             onclick="goBackToList()">
@@ -1084,23 +742,15 @@ function openQuestion(id) {
 
         <div class="card">
 
-
             <div class="question-number">
-
                 ${q.number}
-
             </div>
-
 
             <div class="question-text">
-
                 ${q.question}
-
             </div>
 
-
             <div id="choices">
-
     `;
 
 
@@ -1110,9 +760,7 @@ function openQuestion(id) {
             html += `
 
                 <button
-
                     class="choice"
-
                     id="choice-${index}"
 
                     onclick="answerQuestion(
@@ -1162,10 +810,6 @@ function openQuestion(id) {
 
 
 
-/* =====================================================
-   문제 풀이
-===================================================== */
-
 function answerQuestion(
     id,
     selectedIndex
@@ -1181,17 +825,15 @@ function answerQuestion(
     if (!q) return;
 
 
-    const buttons =
-        document.querySelectorAll(
+    document
+        .querySelectorAll(
             "#choices .choice"
-        );
+        )
+        .forEach(button => {
 
-
-    buttons.forEach(
-        button => {
             button.disabled = true;
-        }
-    );
+
+        });
 
 
     const selected =
@@ -1208,28 +850,21 @@ function answerQuestion(
         );
 
 
-    if (
-        selectedIndex ===
-        q.answer
-    ) {
+    if (selectedIndex === q.answer) {
 
         selected
             .classList
             .add("correct");
 
-    }
-
-    else {
+    } else {
 
         selected
             .classList
             .add("wrong");
 
-
         correct
             .classList
             .add("correct");
-
 
         saveWrong(q);
 
@@ -1242,11 +877,9 @@ function answerQuestion(
 
         <div class="answer-label">
 
-            정답:
-            ${q.answer + 1}번
+            정답: ${q.answer + 1}번
 
         </div>
-
 
         <div class="explanation">
 
@@ -1264,10 +897,6 @@ function answerQuestion(
 
 
 
-/* =====================================================
-   오답 저장
-===================================================== */
-
 function saveWrong(q) {
 
     const exists =
@@ -1280,15 +909,11 @@ function saveWrong(q) {
 
         wrongAnswers.push(q);
 
-
         localStorage.setItem(
-
             "wrongAnswers",
-
             JSON.stringify(
                 wrongAnswers
             )
-
         );
 
     }
@@ -1296,10 +921,6 @@ function saveWrong(q) {
 }
 
 
-
-/* =====================================================
-   오답
-===================================================== */
 
 function showWrong() {
 
@@ -1315,9 +936,7 @@ function showWrong() {
     let html = "";
 
 
-    if (
-        wrongAnswers.length === 0
-    ) {
+    if (wrongAnswers.length === 0) {
 
         html = `
 
@@ -1329,16 +948,13 @@ function showWrong() {
 
         `;
 
-    }
-
-    else {
+    } else {
 
         wrongAnswers.forEach(q => {
 
             html += `
 
                 <button
-
                     class="menu-button"
 
                     onclick="openWrongQuestion(
@@ -1366,10 +982,6 @@ function showWrong() {
 
 
 
-/* =====================================================
-   오답 문제 열기
-===================================================== */
-
 function openWrongQuestion(id) {
 
     const q =
@@ -1385,7 +997,6 @@ function openWrongQuestion(id) {
     let html = `
 
         <button
-
             class="back-button"
 
             onclick="showWrong()">
@@ -1397,18 +1008,12 @@ function openWrongQuestion(id) {
 
         <div class="card">
 
-
             <div class="question-number">
-
                 ${q.number}
-
             </div>
 
-
             <div class="question-text">
-
                 ${q.question}
-
             </div>
 
     `;
@@ -1420,9 +1025,7 @@ function openWrongQuestion(id) {
             html += `
 
                 <button
-
-                    class="choice
-                    ${
+                    class="choice ${
                         index === q.answer
                         ? "correct"
                         : ""
@@ -1453,7 +1056,6 @@ function openWrongQuestion(id) {
 
             </div>
 
-
         </div>
 
     `;
@@ -1467,10 +1069,6 @@ function openWrongQuestion(id) {
 
 
 
-/* =====================================================
-   문제 목록으로 돌아가기
-===================================================== */
-
 function goBackToList() {
 
     if (
@@ -1482,9 +1080,7 @@ function goBackToList() {
             window.currentQuestion.subject
         );
 
-    }
-
-    else if (
+    } else if (
         window.currentQuestion
     ) {
 
@@ -1503,16 +1099,9 @@ function goBackToList() {
 }
 
 
-
-/* =====================================================
-   첫 화면
-===================================================== */
-
 showHome("past");
 
-
 </script>
-
 
 </body>
 
