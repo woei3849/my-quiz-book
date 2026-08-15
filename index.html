@@ -926,19 +926,40 @@ function showWrong() {
 
     hideScreens();
 
-
     document
         .getElementById("wrongScreen")
         .classList
         .add("active");
 
+    showWrongSubjects();
+}
 
-    let html = "";
+
+// =========================
+// 오답 - 과목
+// =========================
+
+function showWrongSubjects() {
+
+    const subjects = [...new Set(
+
+        wrongAnswers
+
+            .map(q => q.subject)
+
+    )];
 
 
-    if (wrongAnswers.length === 0) {
+    let html = `
 
-        html = `
+        <h2>오답</h2>
+
+    `;
+
+
+    if (subjects.length === 0) {
+
+        html += `
 
             <div class="empty">
 
@@ -950,20 +971,19 @@ function showWrong() {
 
     } else {
 
-        wrongAnswers.forEach(q => {
+        subjects.forEach(subject => {
 
             html += `
 
                 <button
+
                     class="menu-button"
 
-                    onclick="openWrongQuestion(
-                        ${q.id}
+                    onclick="showWrongExamTypes(
+                        '${subject}'
                     )">
 
-                    ${q.subject}
-                    ·
-                    ${q.number}
+                    📖 ${subject}
 
                 </button>
 
@@ -982,10 +1002,239 @@ function showWrong() {
 
 
 
+// =========================
+// 오답 - 국가직 / 지방직
+// =========================
+
+function showWrongExamTypes(subject) {
+
+    const examTypes = [...new Set(
+
+        wrongAnswers
+
+            .filter(q =>
+                q.subject === subject
+            )
+
+            .map(q =>
+                q.examType
+            )
+
+            .filter(type =>
+                type !== ""
+            )
+
+    )];
+
+
+    let html = `
+
+        <button
+
+            class="back-button"
+
+            onclick="showWrongSubjects()">
+
+            ← 과목
+
+        </button>
+
+        <h2>${subject}</h2>
+
+    `;
+
+
+    examTypes.forEach(examType => {
+
+        html += `
+
+            <button
+
+                class="menu-button"
+
+                onclick="showWrongYears(
+                    '${subject}',
+                    '${examType}'
+                )">
+
+                📝 ${examType}
+
+            </button>
+
+        `;
+
+    });
+
+
+    document
+        .getElementById("wrongContent")
+        .innerHTML = html;
+
+}
+
+
+
+// =========================
+// 오답 - 연도
+// =========================
+
+function showWrongYears(
+    subject,
+    examType
+) {
+
+    const years = [...new Set(
+
+        wrongAnswers
+
+            .filter(q =>
+                q.subject === subject &&
+                q.examType === examType
+            )
+
+            .map(q =>
+                q.year
+            )
+
+            .filter(year =>
+                year !== ""
+            )
+
+    )];
+
+
+    let html = `
+
+        <button
+
+            class="back-button"
+
+            onclick="showWrongExamTypes(
+                '${subject}'
+            )">
+
+            ← 시험종류
+
+        </button>
+
+        <h2>
+            ${subject} · ${examType}
+        </h2>
+
+    `;
+
+
+    years.forEach(year => {
+
+        html += `
+
+            <button
+
+                class="menu-button"
+
+                onclick="showWrongQuestions(
+                    '${subject}',
+                    '${examType}',
+                    '${year}'
+                )">
+
+                📅 ${year}년
+
+            </button>
+
+        `;
+
+    });
+
+
+    document
+        .getElementById("wrongContent")
+        .innerHTML = html;
+
+}
+
+
+
+// =========================
+// 오답 - 문제 목록
+// =========================
+
+function showWrongQuestions(
+    subject,
+    examType,
+    year
+) {
+
+    const list = wrongAnswers.filter(q =>
+
+        q.subject === subject &&
+
+        q.examType === examType &&
+
+        q.year === year
+
+    );
+
+
+    let html = `
+
+        <button
+
+            class="back-button"
+
+            onclick="showWrongYears(
+                '${subject}',
+                '${examType}'
+            )">
+
+            ← 연도
+
+        </button>
+
+        <h2>
+            ${year}년 ${examType}
+        </h2>
+
+    `;
+
+
+    list.forEach(q => {
+
+        html += `
+
+            <button
+
+                class="menu-button"
+
+                onclick="openWrongQuestion(
+                    ${q.id}
+                )">
+
+                ${q.number}
+
+            </button>
+
+        `;
+
+    });
+
+
+    document
+        .getElementById("wrongContent")
+        .innerHTML = html;
+
+}
+
+
+
+// =========================
+// 오답 문제 풀기
+// =========================
+
 function openWrongQuestion(id) {
 
     const q =
-        questions.find(
+        wrongAnswers.find(
             question =>
                 question.id === id
         );
@@ -997,11 +1246,16 @@ function openWrongQuestion(id) {
     let html = `
 
         <button
+
             class="back-button"
 
-            onclick="showWrong()">
+            onclick="showWrongQuestions(
+                '${q.subject}',
+                '${q.examType}',
+                '${q.year}'
+            )">
 
-            ← 오답 목록
+            ← 문제 목록
 
         </button>
 
@@ -1009,12 +1263,20 @@ function openWrongQuestion(id) {
         <div class="card">
 
             <div class="question-number">
+
                 ${q.number}
+
             </div>
 
+
             <div class="question-text">
+
                 ${q.question}
+
             </div>
+
+
+            <div id="wrongChoices">
 
     `;
 
@@ -1025,16 +1287,17 @@ function openWrongQuestion(id) {
             html += `
 
                 <button
-                    class="choice ${
-                        index === q.answer
-                        ? "correct"
-                        : ""
-                    }"
 
-                    disabled>
+                    class="choice"
 
-                    ${index + 1}.
-                    ${choice}
+                    id="wrong-choice-${index}"
+
+                    onclick="answerWrongQuestion(
+                        ${q.id},
+                        ${index}
+                    )">
+
+                    ${index + 1}. ${choice}
 
                 </button>
 
@@ -1046,15 +1309,9 @@ function openWrongQuestion(id) {
 
     html += `
 
-            <div class="explanation">
-
-                <strong>해설</strong>
-
-                <br><br>
-
-                ${q.explanation}
-
             </div>
+
+            <div id="wrongFeedback"></div>
 
         </div>
 
@@ -1067,6 +1324,99 @@ function openWrongQuestion(id) {
 
 }
 
+
+
+// =========================
+// 오답 문제 정답 확인
+// =========================
+
+function answerWrongQuestion(
+    id,
+    selectedIndex
+) {
+
+    const q =
+        wrongAnswers.find(
+            question =>
+                question.id === id
+        );
+
+
+    if (!q) return;
+
+
+    document
+
+        .querySelectorAll(
+            "#wrongChoices .choice"
+        )
+
+        .forEach(button => {
+
+            button.disabled = true;
+
+        });
+
+
+    const selected =
+        document.getElementById(
+            "wrong-choice-" +
+            selectedIndex
+        );
+
+
+    const correct =
+        document.getElementById(
+            "wrong-choice-" +
+            q.answer
+        );
+
+
+    if (
+        selectedIndex === q.answer
+    ) {
+
+        selected
+            .classList
+            .add("correct");
+
+    } else {
+
+        selected
+            .classList
+            .add("wrong");
+
+        correct
+            .classList
+            .add("correct");
+
+    }
+
+
+    document
+        .getElementById("wrongFeedback")
+        .innerHTML = `
+
+        <div class="answer-label">
+
+            정답: ${q.answer + 1}번
+
+        </div>
+
+
+        <div class="explanation">
+
+            <strong>해설</strong>
+
+            <br><br>
+
+            ${q.explanation}
+
+        </div>
+
+    `;
+
+}
 
 
 function goBackToList() {
