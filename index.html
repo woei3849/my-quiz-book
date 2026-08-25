@@ -114,6 +114,9 @@ h2 {
     line-height: 1.6;
     font-weight: 600;
     margin-bottom: 18px;
+
+    /* 문제에서 입력한 줄바꿈 유지 */
+    white-space: pre-line;
 }
 
 .choice {
@@ -160,6 +163,27 @@ h2 {
     border-radius: 10px;
     line-height: 1.6;
     border-left: 4px solid #888;
+
+    white-space: pre-line;
+}
+
+.short-answer-input {
+    width: 100%;
+    padding: 14px;
+    border: 1px solid #bbb;
+    border-radius: 10px;
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+.check-answer-button {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    background: #eeeeee;
+    font-size: 16px;
+    font-weight: bold;
 }
 
 .empty {
@@ -167,10 +191,7 @@ h2 {
     color: #777;
     padding: 40px 10px;
 }
-.question-text {
-    white-space: pre-line;
-}
-      
+
 </style>
 
 </head>
@@ -238,21 +259,28 @@ h2 {
 </main>
 
 
-<!-- ★ 문제 데이터 파일 -->
-
-<script src="questions.js"></script>
-
-
-<!-- ★ 문제집 기능 -->
-
 <script>
 
+/* =========================
+   문제 데이터
+========================= */
+
+let questions = [];
+
+
+/* =========================
+   오답 데이터
+========================= */
 
 let wrongAnswers =
     JSON.parse(
         localStorage.getItem("wrongAnswers")
     ) || [];
 
+
+/* =========================
+   화면 숨기기
+========================= */
 
 function hideScreens() {
 
@@ -266,6 +294,10 @@ function hideScreens() {
 
 }
 
+
+/* =========================
+   홈 화면
+========================= */
 
 function showHome(type) {
 
@@ -296,6 +328,9 @@ function showHome(type) {
 }
 
 
+/* =========================
+   기출 - 과목
+========================= */
 
 function showPastSubjects() {
 
@@ -342,6 +377,9 @@ function showPastSubjects() {
 }
 
 
+/* =========================
+   기출 - 국가직 / 지방직
+========================= */
 
 function showExamTypes(subject) {
 
@@ -356,6 +394,10 @@ function showExamTypes(subject) {
 
             .map(q =>
                 q.examType
+            )
+
+            .filter(type =>
+                type !== ""
             )
 
     )];
@@ -405,6 +447,9 @@ function showExamTypes(subject) {
 }
 
 
+/* =========================
+   기출 - 연도
+========================= */
 
 function showYears(
     subject,
@@ -423,6 +468,10 @@ function showYears(
 
             .map(q =>
                 q.year
+            )
+
+            .filter(year =>
+                year !== ""
             )
 
     )];
@@ -477,6 +526,9 @@ function showYears(
 }
 
 
+/* =========================
+   기출 - 문제 목록
+========================= */
 
 function showQuestions(
     subject,
@@ -543,6 +595,9 @@ function showQuestions(
 }
 
 
+/* =========================
+   이론 - 과목
+========================= */
 
 function showTheorySubjects() {
 
@@ -591,6 +646,9 @@ function showTheorySubjects() {
 }
 
 
+/* =========================
+   이론 - 단원
+========================= */
 
 function showTheoryUnits(subject) {
 
@@ -658,6 +716,9 @@ function showTheoryUnits(subject) {
 }
 
 
+/* =========================
+   이론 - 문제 목록
+========================= */
 
 function showTheoryQuestions(
     subject,
@@ -718,6 +779,9 @@ function showTheoryQuestions(
 }
 
 
+/* =========================
+   문제 열기
+========================= */
 
 function openQuestion(id) {
 
@@ -752,40 +816,87 @@ function openQuestion(id) {
             <div class="question-text">
                 ${q.question}
             </div>
-
-            <div id="choices">
     `;
 
 
-    q.choices.forEach(
-        (choice, index) => {
+    /* =========================
+       객관식
+    ========================= */
 
-            html += `
+    if (q.type !== "short") {
 
-                <button
-                    class="choice"
-                    id="choice-${index}"
+        html += `
 
-                    onclick="answerQuestion(
-                        ${q.id},
-                        ${index}
-                    )">
-
-                    ${index + 1}. ${choice}
-
-                </button>
-
-            `;
-
-        }
-    );
+            <div id="choices">
+        `;
 
 
-    html += `
+        q.choices.forEach(
+            (choice, index) => {
+
+                html += `
+
+                    <button
+                        class="choice"
+                        id="choice-${index}"
+
+                        onclick="answerQuestion(
+                            ${q.id},
+                            ${index}
+                        )">
+
+                        ${index + 1}. ${choice}
+
+                    </button>
+
+                `;
+
+            }
+        );
+
+
+        html += `
 
             </div>
 
             <div id="feedback"></div>
+
+        `;
+
+    }
+
+
+    /* =========================
+       주관식
+    ========================= */
+
+    else {
+
+        html += `
+
+            <input
+                type="text"
+                id="shortAnswer"
+                class="short-answer-input"
+                placeholder="답을 입력하세요"
+            >
+
+            <button
+                class="check-answer-button"
+                onclick="answerShortQuestion(${q.id})">
+
+                정답 확인
+
+            </button>
+
+            <div id="feedback"></div>
+
+        `;
+
+    }
+
+
+    html += `
 
         </div>
 
@@ -812,6 +923,9 @@ function openQuestion(id) {
 }
 
 
+/* =========================
+   객관식 정답 확인
+========================= */
 
 function answerQuestion(
     id,
@@ -899,6 +1013,103 @@ function answerQuestion(
 }
 
 
+/* =========================
+   주관식 정답 확인
+========================= */
+
+function answerShortQuestion(id) {
+
+    const q =
+        questions.find(
+            question =>
+                question.id === id
+        );
+
+
+    if (!q) return;
+
+
+    const input =
+        document.getElementById(
+            "shortAnswer"
+        );
+
+
+    if (!input) return;
+
+
+    const userAnswer =
+        input.value.trim();
+
+
+    if (userAnswer === "") {
+
+        return;
+
+    }
+
+
+    const correctAnswer =
+        String(q.answer)
+            .trim();
+
+
+    const isCorrect =
+        userAnswer
+            .toLowerCase() ===
+        correctAnswer
+            .toLowerCase();
+
+
+    input.disabled = true;
+
+
+    document
+        .querySelector(
+            ".check-answer-button"
+        )
+        .disabled = true;
+
+
+    if (!isCorrect) {
+
+        saveWrong(q);
+
+    }
+
+
+    document
+        .getElementById("feedback")
+        .innerHTML = `
+
+        <div class="answer-label">
+
+            ${isCorrect ? "정답입니다! 🎉" : "오답입니다."}
+
+            <br><br>
+
+            정답: ${q.answer}
+
+        </div>
+
+        <div class="explanation">
+
+            <strong>해설</strong>
+
+            <br><br>
+
+            ${q.explanation}
+
+        </div>
+
+    `;
+
+}
+
+
+/* =========================
+   오답 저장
+========================= */
 
 function saveWrong(q) {
 
@@ -924,6 +1135,9 @@ function saveWrong(q) {
 }
 
 
+/* =========================
+   오답
+========================= */
 
 function showWrong() {
 
@@ -935,12 +1149,13 @@ function showWrong() {
         .add("active");
 
     showWrongSubjects();
+
 }
 
 
-// =========================
-// 오답 - 과목
-// =========================
+/* =========================
+   오답 - 과목
+========================= */
 
 function showWrongSubjects() {
 
@@ -948,7 +1163,9 @@ function showWrongSubjects() {
 
         wrongAnswers
 
-            .map(q => q.subject)
+            .map(q =>
+                q.subject
+            )
 
     )];
 
@@ -1004,12 +1221,13 @@ function showWrongSubjects() {
 }
 
 
+/* =========================
+   오답 - 국가직 / 지방직
+========================= */
 
-// =========================
-// 오답 - 국가직 / 지방직
-// =========================
-
-function showWrongExamTypes(subject) {
+function showWrongExamTypes(
+    subject
+) {
 
     const examTypes = [...new Set(
 
@@ -1076,10 +1294,9 @@ function showWrongExamTypes(subject) {
 }
 
 
-
-// =========================
-// 오답 - 연도
-// =========================
+/* =========================
+   오답 - 연도
+========================= */
 
 function showWrongYears(
     subject,
@@ -1157,10 +1374,9 @@ function showWrongYears(
 }
 
 
-
-// =========================
-// 오답 - 문제 목록
-// =========================
+/* =========================
+   오답 - 문제 목록
+========================= */
 
 function showWrongQuestions(
     subject,
@@ -1229,10 +1445,9 @@ function showWrongQuestions(
 }
 
 
-
-// =========================
-// 오답 문제 풀기
-// =========================
+/* =========================
+   오답 문제 열기
+========================= */
 
 function openWrongQuestion(id) {
 
@@ -1278,43 +1493,89 @@ function openWrongQuestion(id) {
 
             </div>
 
-
-            <div id="wrongChoices">
-
     `;
 
 
-    q.choices.forEach(
-        (choice, index) => {
+    /* =========================
+       오답 객관식
+    ========================= */
 
-            html += `
+    if (q.type !== "short") {
 
-                <button
+        html += `
 
-                    class="choice"
-
-                    id="wrong-choice-${index}"
-
-                    onclick="answerWrongQuestion(
-                        ${q.id},
-                        ${index}
-                    )">
-
-                    ${index + 1}. ${choice}
-
-                </button>
-
-            `;
-
-        }
-    );
+            <div id="wrongChoices">
+        `;
 
 
-    html += `
+        q.choices.forEach(
+            (choice, index) => {
+
+                html += `
+
+                    <button
+
+                        class="choice"
+
+                        id="wrong-choice-${index}"
+
+                        onclick="answerWrongQuestion(
+                            ${q.id},
+                            ${index}
+                        )">
+
+                        ${index + 1}. ${choice}
+
+                    </button>
+
+                `;
+
+            }
+        );
+
+
+        html += `
 
             </div>
 
             <div id="wrongFeedback"></div>
+
+        `;
+
+    }
+
+
+    /* =========================
+       오답 주관식
+    ========================= */
+
+    else {
+
+        html += `
+
+            <input
+                type="text"
+                id="wrongShortAnswer"
+                class="short-answer-input"
+                placeholder="답을 입력하세요"
+            >
+
+            <button
+                class="check-answer-button"
+                onclick="answerWrongShortQuestion(${q.id})">
+
+                정답 확인
+
+            </button>
+
+            <div id="wrongFeedback"></div>
+
+        `;
+
+    }
+
+
+    html += `
 
         </div>
 
@@ -1328,10 +1589,9 @@ function openWrongQuestion(id) {
 }
 
 
-
-// =========================
-// 오답 문제 정답 확인
-// =========================
+/* =========================
+   오답 객관식 정답 확인
+========================= */
 
 function answerWrongQuestion(
     id,
@@ -1422,6 +1682,100 @@ function answerWrongQuestion(
 }
 
 
+/* =========================
+   오답 주관식 정답 확인
+========================= */
+
+function answerWrongShortQuestion(
+    id
+) {
+
+    const q =
+        wrongAnswers.find(
+            question =>
+                question.id === id
+        );
+
+
+    if (!q) return;
+
+
+    const input =
+        document.getElementById(
+            "wrongShortAnswer"
+        );
+
+
+    if (!input) return;
+
+
+    const userAnswer =
+        input.value.trim();
+
+
+    if (userAnswer === "") {
+
+        return;
+
+    }
+
+
+    const correctAnswer =
+        String(q.answer)
+            .trim();
+
+
+    const isCorrect =
+        userAnswer
+            .toLowerCase() ===
+        correctAnswer
+            .toLowerCase();
+
+
+    input.disabled = true;
+
+
+    document
+        .querySelector(
+            ".check-answer-button"
+        )
+        .disabled = true;
+
+
+    document
+        .getElementById("wrongFeedback")
+        .innerHTML = `
+
+        <div class="answer-label">
+
+            ${isCorrect ? "정답입니다! 🎉" : "오답입니다."}
+
+            <br><br>
+
+            정답: ${q.answer}
+
+        </div>
+
+
+        <div class="explanation">
+
+            <strong>해설</strong>
+
+            <br><br>
+
+            ${q.explanation}
+
+        </div>
+
+    `;
+
+}
+
+
+/* =========================
+   문제 목록으로 돌아가기
+========================= */
+
 function goBackToList() {
 
     if (
@@ -1452,9 +1806,59 @@ function goBackToList() {
 }
 
 
-showHome("past");
+/* =========================
+   JSON 불러오기
+========================= */
+
+fetch("questions.json")
+
+    .then(response => {
+
+        if (!response.ok) {
+
+            throw new Error(
+                "questions.json을 불러오지 못했습니다."
+            );
+
+        }
+
+        return response.json();
+
+    })
+
+    .then(data => {
+
+        questions = data;
+
+        console.log(
+            "문제 불러오기 완료:",
+            questions.length
+        );
+
+        showHome("past");
+
+    })
+
+    .catch(error => {
+
+        console.error(error);
+
+        document
+            .getElementById("pastContent")
+            .innerHTML = `
+
+                <div class="empty">
+
+                    문제 데이터를 불러오지 못했습니다.
+
+                </div>
+
+            `;
+
+    });
 
 </script>
+
 
 </body>
 
