@@ -1,21 +1,97 @@
 // ========================================
 // 나의 문제집
 // app.js
+// questions.json을 불러오는 버전
 // ========================================
 
 
 // ========================================
-// 오답 데이터 불러오기
+// 전역 변수
 // ========================================
+
+let questions = [];
 
 let wrongAnswers =
     JSON.parse(
         localStorage.getItem("wrongAnswers")
     ) || [];
 
-
-// 현재 풀고 있는 문제
 window.currentQuestion = null;
+
+
+// ========================================
+// questions.json 불러오기
+// ========================================
+
+async function loadQuestions() {
+
+    try {
+
+        const response = await fetch(
+            "questions.json?version=" + Date.now()
+        );
+
+        if (!response.ok) {
+
+            throw new Error(
+                "questions.json을 불러오지 못했습니다."
+            );
+
+        }
+
+        questions = await response.json();
+
+        console.log(
+            "문제 불러오기 완료:",
+            questions.length,
+            "개"
+        );
+
+        // 문제 데이터가 정상적으로 배열인지 확인
+        if (!Array.isArray(questions)) {
+
+            throw new Error(
+                "questions.json의 최상위 구조는 배열 [ ] 이어야 합니다."
+            );
+
+        }
+
+        showHome("past");
+
+    }
+
+    catch (error) {
+
+        console.error(error);
+
+        document
+            .getElementById("pastContent")
+            .innerHTML = `
+
+                <div class="empty">
+
+                    <strong>
+                        문제 데이터를 불러오지 못했습니다.
+                    </strong>
+
+                    <br><br>
+
+                    questions.json 파일이
+                    index.html과 같은 위치에 있는지 확인해주세요.
+
+                    <br><br>
+
+                    파일 이름은 정확히
+                    <strong>questions.json</strong>
+                    이어야 합니다.
+
+                </div>
+
+            `;
+
+    }
+
+}
 
 
 // ========================================
@@ -53,7 +129,7 @@ function showHome(type) {
 
     }
 
-    if (type === "theory") {
+    else if (type === "theory") {
 
         document
             .getElementById("theoryScreen")
@@ -73,33 +149,54 @@ function showHome(type) {
 
 function showPastSubjects() {
 
-    const subjects = [...new Set(
+    const subjects = [
+        ...new Set(
 
-        questions
-            .filter(q =>
-                q.section === "기출"
-            )
-            .map(q =>
-                q.subject
-            )
+            questions
 
-    )];
+                .filter(q =>
+                    q.section === "기출"
+                )
+
+                .map(q =>
+                    q.subject
+                )
+
+                .filter(subject =>
+                    subject
+                )
+
+        )
+    ];
 
 
     let html = "";
+
+
+    if (subjects.length === 0) {
+
+        html += `
+
+            <div class="empty">
+                등록된 기출 문제가 없습니다.
+            </div>
+
+        `;
+
+    }
 
 
     subjects.forEach(subject => {
 
         html += `
 
-        <button
-            class="menu-button"
-            onclick="showExamTypes('${subject}')">
+            <button
+                class="menu-button"
+                onclick="showExamTypes('${escapeQuotes(subject)}')">
 
-            📖 ${subject}
+                📖 ${subject}
 
-        </button>
+            </button>
 
         `;
 
@@ -120,20 +217,26 @@ function showPastSubjects() {
 
 function showExamTypes(subject) {
 
-    const examTypes = [...new Set(
+    const examTypes = [
+        ...new Set(
 
-        questions
+            questions
 
-            .filter(q =>
-                q.section === "기출" &&
-                q.subject === subject
-            )
+                .filter(q =>
+                    q.section === "기출" &&
+                    q.subject === subject
+                )
 
-            .map(q =>
-                q.examType
-            )
+                .map(q =>
+                    q.examType
+                )
 
-    )];
+                .filter(type =>
+                    type
+                )
+
+        )
+    ];
 
 
     let html = `
@@ -151,20 +254,33 @@ function showExamTypes(subject) {
     `;
 
 
+    if (examTypes.length === 0) {
+
+        html += `
+
+            <div class="empty">
+                등록된 시험종류가 없습니다.
+            </div>
+
+        `;
+
+    }
+
+
     examTypes.forEach(examType => {
 
         html += `
 
-        <button
-            class="menu-button"
-            onclick="showYears(
-                '${subject}',
-                '${examType}'
-            )">
+            <button
+                class="menu-button"
+                onclick="showYears(
+                    '${escapeQuotes(subject)}',
+                    '${escapeQuotes(examType)}'
+                )">
 
-            📝 ${examType}
+                📝 ${examType}
 
-        </button>
+            </button>
 
         `;
 
@@ -188,28 +304,36 @@ function showYears(
     examType
 ) {
 
-    const years = [...new Set(
+    const years = [
+        ...new Set(
 
-        questions
+            questions
 
-            .filter(q =>
-                q.section === "기출" &&
-                q.subject === subject &&
-                q.examType === examType
-            )
+                .filter(q =>
+                    q.section === "기출" &&
+                    q.subject === subject &&
+                    q.examType === examType
+                )
 
-            .map(q =>
-                q.year
-            )
+                .map(q =>
+                    String(q.year)
+                )
 
-    )];
+                .filter(year =>
+                    year
+                )
+
+        )
+    ];
 
 
     let html = `
 
         <button
             class="back-button"
-            onclick="showExamTypes('${subject}')">
+            onclick="showExamTypes(
+                '${escapeQuotes(subject)}'
+            )">
 
             ← 시험종류
 
@@ -222,21 +346,34 @@ function showYears(
     `;
 
 
+    if (years.length === 0) {
+
+        html += `
+
+            <div class="empty">
+                등록된 연도가 없습니다.
+            </div>
+
+        `;
+
+    }
+
+
     years.forEach(year => {
 
         html += `
 
-        <button
-            class="menu-button"
-            onclick="showQuestions(
-                '${subject}',
-                '${examType}',
-                '${year}'
-            )">
+            <button
+                class="menu-button"
+                onclick="showQuestions(
+                    '${escapeQuotes(subject)}',
+                    '${escapeQuotes(examType)}',
+                    '${escapeQuotes(year)}'
+                )">
 
-            📅 ${year}년
+                📅 ${year}년
 
-        </button>
+            </button>
 
         `;
 
@@ -269,7 +406,7 @@ function showQuestions(
 
         q.examType === examType &&
 
-        q.year === year
+        String(q.year) === String(year)
 
     );
 
@@ -279,8 +416,8 @@ function showQuestions(
         <button
             class="back-button"
             onclick="showYears(
-                '${subject}',
-                '${examType}'
+                '${escapeQuotes(subject)}',
+                '${escapeQuotes(examType)}'
             )">
 
             ← 연도
@@ -294,17 +431,30 @@ function showQuestions(
     `;
 
 
+    if (list.length === 0) {
+
+        html += `
+
+            <div class="empty">
+                이 조건에 해당하는 문제가 없습니다.
+            </div>
+
+        `;
+
+    }
+
+
     list.forEach(q => {
 
         html += `
 
-        <button
-            class="menu-button"
-            onclick="openQuestion(${q.id})">
+            <button
+                class="menu-button"
+                onclick="openQuestion('${q.id}')">
 
-            ${q.number}
+                ${q.number}
 
-        </button>
+            </button>
 
         `;
 
@@ -325,35 +475,54 @@ function showQuestions(
 
 function showTheorySubjects() {
 
-    const subjects = [...new Set(
+    const subjects = [
+        ...new Set(
 
-        questions
+            questions
 
-            .filter(q =>
-                q.section === "이론"
-            )
+                .filter(q =>
+                    q.section === "이론"
+                )
 
-            .map(q =>
-                q.subject
-            )
+                .map(q =>
+                    q.subject
+                )
 
-    )];
+                .filter(subject =>
+                    subject
+                )
+
+        )
+    ];
 
 
     let html = "";
+
+
+    if (subjects.length === 0) {
+
+        html += `
+
+            <div class="empty">
+                등록된 이론 문제가 없습니다.
+            </div>
+
+        `;
+
+    }
 
 
     subjects.forEach(subject => {
 
         html += `
 
-        <button
-            class="menu-button"
-            onclick="showTheoryUnits('${subject}')">
+            <button
+                class="menu-button"
+                onclick="showTheoryUnits('${escapeQuotes(subject)}')">
 
-            📖 ${subject}
+                📖 ${subject}
 
-        </button>
+            </button>
 
         `;
 
@@ -374,24 +543,26 @@ function showTheorySubjects() {
 
 function showTheoryUnits(subject) {
 
-    const units = [...new Set(
+    const units = [
+        ...new Set(
 
-        questions
+            questions
 
-            .filter(q =>
-                q.section === "이론" &&
-                q.subject === subject
-            )
+                .filter(q =>
+                    q.section === "이론" &&
+                    q.subject === subject
+                )
 
-            .map(q =>
-                q.unit
-            )
+                .map(q =>
+                    q.unit
+                )
 
-            .filter(unit =>
-                unit !== ""
-            )
+                .filter(unit =>
+                    unit && String(unit).trim() !== ""
+                )
 
-    )];
+        )
+    ];
 
 
     let html = `
@@ -409,20 +580,41 @@ function showTheoryUnits(subject) {
     `;
 
 
+    if (units.length === 0) {
+
+        html += `
+
+            <div class="empty">
+
+                아직 등록된 단원이 없습니다.
+
+                <br><br>
+
+                questions.json의
+                <strong>unit</strong>에
+                단원명을 입력해주세요.
+
+            </div>
+
+        `;
+
+    }
+
+
     units.forEach(unit => {
 
         html += `
 
-        <button
-            class="menu-button"
-            onclick="showTheoryQuestions(
-                '${subject}',
-                '${unit}'
-            )">
+            <button
+                class="menu-button"
+                onclick="showTheoryQuestions(
+                    '${escapeQuotes(subject)}',
+                    '${escapeQuotes(unit)}'
+                )">
 
-            📂 ${unit}
+                📂 ${unit}
 
-        </button>
+            </button>
 
         `;
 
@@ -461,7 +653,9 @@ function showTheoryQuestions(
 
         <button
             class="back-button"
-            onclick="showTheoryUnits('${subject}')">
+            onclick="showTheoryUnits(
+                '${escapeQuotes(subject)}'
+            )">
 
             ← 단원
 
@@ -472,17 +666,30 @@ function showTheoryQuestions(
     `;
 
 
+    if (list.length === 0) {
+
+        html += `
+
+            <div class="empty">
+                이 단원에 등록된 문제가 없습니다.
+            </div>
+
+        `;
+
+    }
+
+
     list.forEach(q => {
 
         html += `
 
-        <button
-            class="menu-button"
-            onclick="openQuestion(${q.id})">
+            <button
+                class="menu-button"
+                onclick="openQuestion('${q.id}')">
 
-            ${q.number}
+                ${q.number}
 
-        </button>
+            </button>
 
         `;
 
@@ -506,11 +713,20 @@ function openQuestion(id) {
     const q =
         questions.find(
             question =>
-                question.id === id
+                String(question.id) === String(id)
         );
 
 
-    if (!q) return;
+    if (!q) {
+
+        console.error(
+            "문제를 찾을 수 없습니다. id:",
+            id
+        );
+
+        return;
+
+    }
 
 
     window.currentQuestion = q;
@@ -530,11 +746,11 @@ function openQuestion(id) {
         <div class="card">
 
             <div class="question-number">
-                ${q.number}
+                ${q.number || ""}
             </div>
 
             <div class="question-text">
-                ${q.question}
+                ${q.question || ""}
             </div>
 
     `;
@@ -542,9 +758,14 @@ function openQuestion(id) {
 
     // ====================================
     // 주관식
+    // type: short
+    // 또는 type: 주관식
     // ====================================
 
-    if (q.type === "주관식") {
+    if (
+        q.type === "short" ||
+        q.type === "주관식"
+    ) {
 
         html += `
 
@@ -556,7 +777,7 @@ function openQuestion(id) {
 
             <button
                 class="submit-button"
-                onclick="answerSubjectiveQuestion(${q.id})">
+                onclick="answerSubjectiveQuestion('${q.id}')">
 
                 정답 확인
 
@@ -578,10 +799,17 @@ function openQuestion(id) {
         html += `
 
             <div id="choices">
+
         `;
 
 
-        q.choices.forEach(
+        const choices =
+            Array.isArray(q.choices)
+                ? q.choices
+                : [];
+
+
+        choices.forEach(
             (choice, index) => {
 
                 html += `
@@ -590,7 +818,7 @@ function openQuestion(id) {
                         class="choice"
                         id="choice-${index}"
                         onclick="answerQuestion(
-                            ${q.id},
+                            '${q.id}',
                             ${index}
                         )">
 
@@ -653,7 +881,7 @@ function answerQuestion(
     const q =
         questions.find(
             question =>
-                question.id === id
+                String(question.id) === String(id)
         );
 
 
@@ -678,30 +906,48 @@ function answerQuestion(
         );
 
 
+    const answerIndex =
+        Number(q.answer);
+
+
     const correct =
         document.getElementById(
             "choice-" +
-            q.answer
+            answerIndex
         );
 
 
-    if (selectedIndex === q.answer) {
+    if (
+        selectedIndex === answerIndex
+    ) {
 
-        selected
-            .classList
-            .add("correct");
+        if (selected) {
+
+            selected
+                .classList
+                .add("correct");
+
+        }
 
     }
 
     else {
 
-        selected
-            .classList
-            .add("wrong");
+        if (selected) {
 
-        correct
-            .classList
-            .add("correct");
+            selected
+                .classList
+                .add("wrong");
+
+        }
+
+        if (correct) {
+
+            correct
+                .classList
+                .add("correct");
+
+        }
 
         saveWrong(q);
 
@@ -714,7 +960,7 @@ function answerQuestion(
 
         <div class="answer-label">
 
-            정답: ${q.answer + 1}번
+            정답: ${answerIndex + 1}번
 
         </div>
 
@@ -742,7 +988,7 @@ function answerSubjectiveQuestion(id) {
     const q =
         questions.find(
             question =>
-                question.id === id
+                String(question.id) === String(id)
         );
 
 
@@ -753,6 +999,9 @@ function answerSubjectiveQuestion(id) {
         document.getElementById(
             "subjectiveAnswer"
         );
+
+
+    if (!input) return;
 
 
     const userAnswer =
@@ -771,9 +1020,15 @@ function answerSubjectiveQuestion(id) {
     input.disabled = true;
 
 
+    // answerText가 있으면 answerText 사용
+    // 없으면 answer 사용
     const correctAnswer =
         String(
-            q.answerText || ""
+            q.answerText !== undefined
+                ? q.answerText
+                : q.answer !== undefined
+                    ? q.answer
+                    : ""
         ).trim();
 
 
@@ -799,9 +1054,17 @@ function answerSubjectiveQuestion(id) {
     }
 
 
-    document
-        .querySelector(".submit-button")
-        .disabled = true;
+    const submitButton =
+        document.querySelector(
+            ".submit-button"
+        );
+
+
+    if (submitButton) {
+
+        submitButton.disabled = true;
+
+    }
 
 
     document
@@ -812,8 +1075,8 @@ function answerSubjectiveQuestion(id) {
 
             ${
                 isCorrect
-                ? "⭕ 정답입니다!"
-                : "❌ 오답입니다."
+                    ? "⭕ 정답입니다!"
+                    : "❌ 오답입니다."
             }
 
             <br><br>
@@ -846,7 +1109,8 @@ function saveWrong(q) {
 
     const exists =
         wrongAnswers.some(
-            x => x.id === q.id
+            x =>
+                String(x.id) === String(q.id)
         );
 
 
@@ -891,14 +1155,20 @@ function showWrong() {
 
 function showWrongSubjects() {
 
-    const subjects = [...new Set(
+    const subjects = [
+        ...new Set(
 
-        wrongAnswers
-            .map(q =>
-                q.subject
-            )
+            wrongAnswers
+                .map(q =>
+                    q.subject
+                )
 
-    )];
+                .filter(subject =>
+                    subject
+                )
+
+        )
+    ];
 
 
     let html = `
@@ -931,7 +1201,7 @@ function showWrongSubjects() {
                 <button
                     class="menu-button"
                     onclick="showWrongExamTypes(
-                        '${subject}'
+                        '${escapeQuotes(subject)}'
                     )">
 
                     📖 ${subject}
@@ -959,23 +1229,25 @@ function showWrongSubjects() {
 
 function showWrongExamTypes(subject) {
 
-    const examTypes = [...new Set(
+    const examTypes = [
+        ...new Set(
 
-        wrongAnswers
+            wrongAnswers
 
-            .filter(q =>
-                q.subject === subject
-            )
+                .filter(q =>
+                    q.subject === subject
+                )
 
-            .map(q =>
-                q.examType
-            )
+                .map(q =>
+                    q.examType
+                )
 
-            .filter(type =>
-                type !== ""
-            )
+                .filter(type =>
+                    type
+                )
 
-    )];
+        )
+    ];
 
 
     let html = `
@@ -993,6 +1265,19 @@ function showWrongExamTypes(subject) {
     `;
 
 
+    if (examTypes.length === 0) {
+
+        html += `
+
+            <div class="empty">
+                기출 오답이 없습니다.
+            </div>
+
+        `;
+
+    }
+
+
     examTypes.forEach(examType => {
 
         html += `
@@ -1000,8 +1285,8 @@ function showWrongExamTypes(subject) {
             <button
                 class="menu-button"
                 onclick="showWrongYears(
-                    '${subject}',
-                    '${examType}'
+                    '${escapeQuotes(subject)}',
+                    '${escapeQuotes(examType)}'
                 )">
 
                 📝 ${examType}
@@ -1030,24 +1315,26 @@ function showWrongYears(
     examType
 ) {
 
-    const years = [...new Set(
+    const years = [
+        ...new Set(
 
-        wrongAnswers
+            wrongAnswers
 
-            .filter(q =>
-                q.subject === subject &&
-                q.examType === examType
-            )
+                .filter(q =>
+                    q.subject === subject &&
+                    q.examType === examType
+                )
 
-            .map(q =>
-                q.year
-            )
+                .map(q =>
+                    String(q.year)
+                )
 
-            .filter(year =>
-                year !== ""
-            )
+                .filter(year =>
+                    year
+                )
 
-    )];
+        )
+    ];
 
 
     let html = `
@@ -1055,7 +1342,7 @@ function showWrongYears(
         <button
             class="back-button"
             onclick="showWrongExamTypes(
-                '${subject}'
+                '${escapeQuotes(subject)}'
             )">
 
             ← 시험종류
@@ -1076,9 +1363,9 @@ function showWrongYears(
             <button
                 class="menu-button"
                 onclick="showWrongQuestions(
-                    '${subject}',
-                    '${examType}',
-                    '${year}'
+                    '${escapeQuotes(subject)}',
+                    '${escapeQuotes(examType)}',
+                    '${escapeQuotes(year)}'
                 )">
 
                 📅 ${year}년
@@ -1114,7 +1401,7 @@ function showWrongQuestions(
 
         q.examType === examType &&
 
-        q.year === year
+        String(q.year) === String(year)
 
     );
 
@@ -1124,8 +1411,8 @@ function showWrongQuestions(
         <button
             class="back-button"
             onclick="showWrongYears(
-                '${subject}',
-                '${examType}'
+                '${escapeQuotes(subject)}',
+                '${escapeQuotes(examType)}'
             )">
 
             ← 연도
@@ -1145,9 +1432,7 @@ function showWrongQuestions(
 
             <button
                 class="menu-button"
-                onclick="openWrongQuestion(
-                    ${q.id}
-                )">
+                onclick="openWrongQuestion('${q.id}')">
 
                 ${q.number}
 
@@ -1174,11 +1459,14 @@ function openWrongQuestion(id) {
     const q =
         wrongAnswers.find(
             question =>
-                question.id === id
+                String(question.id) === String(id)
         );
 
 
     if (!q) return;
+
+
+    window.currentQuestion = q;
 
 
     let html = `
@@ -1186,9 +1474,9 @@ function openWrongQuestion(id) {
         <button
             class="back-button"
             onclick="showWrongQuestions(
-                '${q.subject}',
-                '${q.examType}',
-                '${q.year}'
+                '${escapeQuotes(q.subject)}',
+                '${escapeQuotes(q.examType)}',
+                '${escapeQuotes(q.year)}'
             )">
 
             ← 문제 목록
@@ -1199,12 +1487,12 @@ function openWrongQuestion(id) {
         <div class="card">
 
             <div class="question-number">
-                ${q.number}
+                ${q.number || ""}
             </div>
 
 
             <div class="question-text">
-                ${q.question}
+                ${q.question || ""}
             </div>
 
     `;
@@ -1214,7 +1502,10 @@ function openWrongQuestion(id) {
     // 오답 주관식
     // ====================================
 
-    if (q.type === "주관식") {
+    if (
+        q.type === "short" ||
+        q.type === "주관식"
+    ) {
 
         html += `
 
@@ -1227,7 +1518,7 @@ function openWrongQuestion(id) {
             <button
                 class="submit-button"
                 onclick="answerWrongSubjectiveQuestion(
-                    ${q.id}
+                    '${q.id}'
                 )">
 
                 정답 확인
@@ -1250,10 +1541,17 @@ function openWrongQuestion(id) {
         html += `
 
             <div id="wrongChoices">
+
         `;
 
 
-        q.choices.forEach(
+        const choices =
+            Array.isArray(q.choices)
+                ? q.choices
+                : [];
+
+
+        choices.forEach(
             (choice, index) => {
 
                 html += `
@@ -1262,7 +1560,7 @@ function openWrongQuestion(id) {
                         class="choice"
                         id="wrong-choice-${index}"
                         onclick="answerWrongQuestion(
-                            ${q.id},
+                            '${q.id}',
                             ${index}
                         )">
 
@@ -1313,7 +1611,7 @@ function answerWrongQuestion(
     const q =
         wrongAnswers.find(
             question =>
-                question.id === id
+                String(question.id) === String(id)
         );
 
 
@@ -1338,32 +1636,48 @@ function answerWrongQuestion(
         );
 
 
+    const answerIndex =
+        Number(q.answer);
+
+
     const correct =
         document.getElementById(
             "wrong-choice-" +
-            q.answer
+            answerIndex
         );
 
 
     if (
-        selectedIndex === q.answer
+        selectedIndex === answerIndex
     ) {
 
-        selected
-            .classList
-            .add("correct");
+        if (selected) {
+
+            selected
+                .classList
+                .add("correct");
+
+        }
 
     }
 
     else {
 
-        selected
-            .classList
-            .add("wrong");
+        if (selected) {
 
-        correct
-            .classList
-            .add("correct");
+            selected
+                .classList
+                .add("wrong");
+
+        }
+
+        if (correct) {
+
+            correct
+                .classList
+                .add("correct");
+
+        }
 
     }
 
@@ -1374,7 +1688,7 @@ function answerWrongQuestion(
 
         <div class="answer-label">
 
-            정답: ${q.answer + 1}번
+            정답: ${answerIndex + 1}번
 
         </div>
 
@@ -1403,7 +1717,7 @@ function answerWrongSubjectiveQuestion(id) {
     const q =
         wrongAnswers.find(
             question =>
-                question.id === id
+                String(question.id) === String(id)
         );
 
 
@@ -1414,6 +1728,9 @@ function answerWrongSubjectiveQuestion(id) {
         document.getElementById(
             "wrongSubjectiveAnswer"
         );
+
+
+    if (!input) return;
 
 
     const userAnswer =
@@ -1434,7 +1751,11 @@ function answerWrongSubjectiveQuestion(id) {
 
     const correctAnswer =
         String(
-            q.answerText || ""
+            q.answerText !== undefined
+                ? q.answerText
+                : q.answer !== undefined
+                    ? q.answer
+                    : ""
         ).trim();
 
 
@@ -1458,9 +1779,17 @@ function answerWrongSubjectiveQuestion(id) {
     }
 
 
-    document
-        .querySelector(".submit-button")
-        .disabled = true;
+    const submitButton =
+        document.querySelector(
+            ".submit-button"
+        );
+
+
+    if (submitButton) {
+
+        submitButton.disabled = true;
+
+    }
 
 
     document
@@ -1471,8 +1800,8 @@ function answerWrongSubjectiveQuestion(id) {
 
             ${
                 isCorrect
-                ? "⭕ 정답입니다!"
-                : "❌ 오답입니다."
+                    ? "⭕ 정답입니다!"
+                    : "❌ 오답입니다."
             }
 
             <br><br>
@@ -1503,28 +1832,36 @@ function answerWrongSubjectiveQuestion(id) {
 
 function goBackToList() {
 
-    if (
-        window.currentQuestion &&
-        window.currentQuestion.section === "이론"
-    ) {
+    if (!window.currentQuestion) {
+
+        showHome("past");
+
+        return;
+
+    }
+
+
+    const q =
+        window.currentQuestion;
+
+
+    if (q.section === "이론") {
 
         showTheoryUnits(
-            window.currentQuestion.subject
+            q.subject
         );
 
     }
 
-    else if (
-        window.currentQuestion
-    ) {
+    else {
 
         showQuestions(
 
-            window.currentQuestion.subject,
+            q.subject,
 
-            window.currentQuestion.examType,
+            q.examType,
 
-            window.currentQuestion.year
+            q.year
 
         );
 
@@ -1534,7 +1871,20 @@ function goBackToList() {
 
 
 // ========================================
-// 처음 실행
+// HTML 속 문자열에 작은따옴표가 들어가는 경우 방지
 // ========================================
 
-showHome("past");
+function escapeQuotes(value) {
+
+    return String(value)
+        .replace(/\\/g, "\\\\")
+        .replace(/'/g, "\\'");
+
+}
+
+
+// ========================================
+// 시작
+// ========================================
+
+loadQuestions();
