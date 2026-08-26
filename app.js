@@ -1157,16 +1157,55 @@ function answerSubjectiveQuestion(id) {
 // 오답 저장
 // ========================================
 
+// ========================================
+// 오답 저장
+// ========================================
+
 function saveWrong(q) {
 
-    // 현재 localStorage에서 최신 데이터 다시 불러오기
-    let savedWrongAnswers =
-        JSON.parse(
-            localStorage.getItem("wrongAnswers")
-        ) || [];
+    if (!q) {
+        console.log("오답 저장 실패: 문제 데이터가 없습니다.");
+        return;
+    }
+
+    console.log("오답 저장 시도:", q);
+
+    // 현재 localStorage에 저장된 오답 다시 불러오기
+    let savedWrongAnswers = [];
+
+    try {
+
+        const saved =
+            localStorage.getItem("wrongAnswers");
+
+        if (saved) {
+
+            const parsed =
+                JSON.parse(saved);
+
+            if (Array.isArray(parsed)) {
+
+                savedWrongAnswers = parsed;
+
+            }
+
+        }
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "기존 오답 데이터를 읽는 중 오류:",
+            error
+        );
+
+        savedWrongAnswers = [];
+
+    }
 
 
-    // id가 같은 문제인지 확인
+    // 같은 id의 문제가 이미 있는지 확인
     const exists =
         savedWrongAnswers.some(
             item =>
@@ -1174,10 +1213,16 @@ function saveWrong(q) {
         );
 
 
-    // 아직 오답에 없다면 저장
+    // 없으면 추가
     if (!exists) {
 
         savedWrongAnswers.push(q);
+
+    }
+
+
+    // 다시 저장
+    try {
 
         localStorage.setItem(
             "wrongAnswers",
@@ -1186,32 +1231,32 @@ function saveWrong(q) {
             )
         );
 
+        // 현재 메모리에도 즉시 반영
         wrongAnswers =
             savedWrongAnswers;
 
-
         console.log(
             "오답 저장 완료:",
-            q
+            wrongAnswers
         );
 
     }
 
-    else {
+    catch (error) {
 
-        wrongAnswers =
-            savedWrongAnswers;
+        console.error(
+            "오답 저장 실패:",
+            error
+        );
 
-        console.log(
-            "이미 오답에 저장된 문제:",
-            q.id
+        alert(
+            "오답을 저장하지 못했습니다.\n" +
+            "브라우저의 저장공간 설정을 확인해주세요."
         );
 
     }
 
 }
-
-
 // ========================================
 // 오답 화면
 // ========================================
