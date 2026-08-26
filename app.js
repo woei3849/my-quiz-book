@@ -187,6 +187,11 @@ function showExamTypes(subject) {
                 q.examType
             )
 
+            .filter(type =>
+                type !== "" &&
+                type != null
+            )
+
     )];
 
 
@@ -254,6 +259,11 @@ function showYears(
 
             .map(q =>
                 q.year
+            )
+
+            .filter(year =>
+                year !== "" &&
+                year != null
             )
 
     )];
@@ -442,7 +452,8 @@ function showTheoryUnits(subject) {
             )
 
             .filter(unit =>
-                unit !== ""
+                unit !== "" &&
+                unit != null
             )
 
     )];
@@ -569,7 +580,10 @@ function openQuestion(id) {
     window.currentQuestion = q;
 
 
+    // ----------------------------------------
     // 기출 문제 목록
+    // ----------------------------------------
+
     if (q.section === "기출") {
 
         window.currentQuestionList =
@@ -584,7 +598,10 @@ function openQuestion(id) {
 
     }
 
+    // ----------------------------------------
     // 이론 문제 목록
+    // ----------------------------------------
+
     else {
 
         window.currentQuestionList =
@@ -719,7 +736,10 @@ function renderQuestion(q) {
     }
 
 
+    // ====================================
     // 이전 / 다음
+    // ====================================
+
     html += createNavigationButtons();
 
 
@@ -1075,7 +1095,6 @@ function answerSubjectiveQuestion(id) {
 
         </div>
 
-
         <div class="explanation">
 
             <strong>해설</strong>
@@ -1132,69 +1151,46 @@ function showWrong() {
         .classList
         .add("active");
 
-    showWrongSubjects();
+    showWrongMain();
 
 }
 
 
 // ========================================
+// 오답 메인
+// ========================================
+//
 // 오답
-// 과목
+// ├─ 기출
+// └─ 이론
+//
 // ========================================
 
-function showWrongSubjects() {
-
-    const subjects = [...new Set(
-
-        wrongAnswers.map(q =>
-            q.subject
-        )
-
-    )];
-
+function showWrongMain() {
 
     let html = `
 
         <h2>오답</h2>
 
+
+        <button
+            class="menu-button"
+            onclick="showWrongPastSubjects()">
+
+            📝 기출
+
+        </button>
+
+
+        <button
+            class="menu-button"
+            onclick="showWrongTheorySubjects()">
+
+            📚 이론
+
+        </button>
+
     `;
-
-
-    if (subjects.length === 0) {
-
-        html += `
-
-            <div class="empty">
-
-                아직 틀린 문제가 없습니다.
-
-            </div>
-
-        `;
-
-    }
-
-    else {
-
-        subjects.forEach(subject => {
-
-            html += `
-
-                <button
-                    class="menu-button"
-                    onclick="showWrongSections(
-                        '${subject}'
-                    )">
-
-                    📖 ${subject}
-
-                </button>
-
-            `;
-
-        });
-
-    }
 
 
     document
@@ -1205,22 +1201,30 @@ function showWrongSubjects() {
 
 
 // ========================================
+// 오답 기출
+// 과목
+// ========================================
+//
 // 오답
-// 기출 / 이론
+// → 기출
+// → 재배학개론
+// → 국가직 / 지방직
+// → 연도
+//
 // ========================================
 
-function showWrongSections(subject) {
+function showWrongPastSubjects() {
 
-    const sections = [...new Set(
+    const subjects = [...new Set(
 
         wrongAnswers
 
             .filter(q =>
-                q.subject === subject
+                q.section === "기출"
             )
 
             .map(q =>
-                q.section
+                q.subject
             )
 
     )];
@@ -1230,41 +1234,43 @@ function showWrongSections(subject) {
 
         <button
             class="back-button"
-            onclick="showWrongSubjects()">
+            onclick="showWrongMain()">
 
-            ← 과목
+            ← 오답
 
         </button>
 
-        <h2>${subject}</h2>
+        <h2>기출</h2>
 
     `;
 
 
-    sections.forEach(section => {
+    if (subjects.length === 0) {
+
+        html += `
+
+            <div class="empty">
+
+                아직 기출 오답이 없습니다.
+
+            </div>
+
+        `;
+
+    }
+
+
+    subjects.forEach(subject => {
 
         html += `
 
             <button
                 class="menu-button"
-                onclick="
+                onclick="showWrongPastTypes(
+                    '${subject}'
+                )">
 
-                    ${
-                        section === "기출"
-
-                        ? `showWrongPastTypes('${subject}')`
-
-                        : `showWrongTheoryUnits('${subject}')`
-
-                    }
-
-                ">
-
-                ${
-                    section === "기출"
-                    ? "📝 기출"
-                    : "📚 이론"
-                }
+                📖 ${subject}
 
             </button>
 
@@ -1292,8 +1298,8 @@ function showWrongPastTypes(subject) {
         wrongAnswers
 
             .filter(q =>
-                q.subject === subject &&
-                q.section === "기출"
+                q.section === "기출" &&
+                q.subject === subject
             )
 
             .map(q =>
@@ -1301,7 +1307,8 @@ function showWrongPastTypes(subject) {
             )
 
             .filter(type =>
-                type !== ""
+                type !== "" &&
+                type != null
             )
 
     )];
@@ -1311,15 +1318,13 @@ function showWrongPastTypes(subject) {
 
         <button
             class="back-button"
-            onclick="showWrongSections(
-                '${subject}'
-            )">
+            onclick="showWrongPastSubjects()">
 
-            ← 기출 / 이론
+            ← 기출
 
         </button>
 
-        <h2>${subject} · 기출</h2>
+        <h2>${subject}</h2>
 
     `;
 
@@ -1366,8 +1371,8 @@ function showWrongPastYears(
         wrongAnswers
 
             .filter(q =>
-                q.subject === subject &&
                 q.section === "기출" &&
+                q.subject === subject &&
                 q.examType === examType
             )
 
@@ -1376,7 +1381,8 @@ function showWrongPastYears(
             )
 
             .filter(year =>
-                year !== ""
+                year !== "" &&
+                year != null
             )
 
     )];
@@ -1390,7 +1396,7 @@ function showWrongPastYears(
                 '${subject}'
             )">
 
-            ← 시험종류
+            ← ${subject}
 
         </button>
 
@@ -1442,9 +1448,9 @@ function showWrongPastQuestions(
 
     const list = wrongAnswers.filter(q =>
 
-        q.subject === subject &&
-
         q.section === "기출" &&
+
+        q.subject === subject &&
 
         q.examType === examType &&
 
@@ -1501,6 +1507,92 @@ function showWrongPastQuestions(
 
 // ========================================
 // 오답 이론
+// 과목
+// ========================================
+//
+// 오답
+// → 이론
+// → 재배학개론
+// → 벼 기초
+// → 문제
+//
+// ========================================
+
+function showWrongTheorySubjects() {
+
+    const subjects = [...new Set(
+
+        wrongAnswers
+
+            .filter(q =>
+                q.section === "이론"
+            )
+
+            .map(q =>
+                q.subject
+            )
+
+    )];
+
+
+    let html = `
+
+        <button
+            class="back-button"
+            onclick="showWrongMain()">
+
+            ← 오답
+
+        </button>
+
+        <h2>이론</h2>
+
+    `;
+
+
+    if (subjects.length === 0) {
+
+        html += `
+
+            <div class="empty">
+
+                아직 이론 오답이 없습니다.
+
+            </div>
+
+        `;
+
+    }
+
+
+    subjects.forEach(subject => {
+
+        html += `
+
+            <button
+                class="menu-button"
+                onclick="showWrongTheoryUnits(
+                    '${subject}'
+                )">
+
+                📖 ${subject}
+
+            </button>
+
+        `;
+
+    });
+
+
+    document
+        .getElementById("wrongContent")
+        .innerHTML = html;
+
+}
+
+
+// ========================================
+// 오답 이론
 // 단원
 // ========================================
 
@@ -1511,8 +1603,8 @@ function showWrongTheoryUnits(subject) {
         wrongAnswers
 
             .filter(q =>
-                q.subject === subject &&
-                q.section === "이론"
+                q.section === "이론" &&
+                q.subject === subject
             )
 
             .map(q =>
@@ -1520,7 +1612,8 @@ function showWrongTheoryUnits(subject) {
             )
 
             .filter(unit =>
-                unit !== ""
+                unit !== "" &&
+                unit != null
             )
 
     )];
@@ -1530,15 +1623,13 @@ function showWrongTheoryUnits(subject) {
 
         <button
             class="back-button"
-            onclick="showWrongSections(
-                '${subject}'
-            )">
+            onclick="showWrongTheorySubjects()">
 
-            ← 기출 / 이론
+            ← 이론
 
         </button>
 
-        <h2>${subject} · 이론</h2>
+        <h2>${subject}</h2>
 
     `;
 
@@ -1582,9 +1673,9 @@ function showWrongTheoryQuestions(
 
     const list = wrongAnswers.filter(q =>
 
-        q.subject === subject &&
-
         q.section === "이론" &&
+
+        q.subject === subject &&
 
         q.unit === unit
 
@@ -1620,7 +1711,7 @@ function showWrongTheoryQuestions(
 
                 ${q.number}
 
-            </button>
+        </button>
 
         `;
 
@@ -1650,14 +1741,17 @@ function openWrongQuestion(id) {
     if (!q) return;
 
 
-    // 현재 오답 목록
+    // ----------------------------------------
+    // 오답 기출 목록
+    // ----------------------------------------
+
     if (q.section === "기출") {
 
         window.currentQuestionList =
             wrongAnswers.filter(item =>
 
-                item.subject === q.subject &&
                 item.section === "기출" &&
+                item.subject === q.subject &&
                 item.examType === q.examType &&
                 item.year === q.year
 
@@ -1665,13 +1759,17 @@ function openWrongQuestion(id) {
 
     }
 
+    // ----------------------------------------
+    // 오답 이론 목록
+    // ----------------------------------------
+
     else {
 
         window.currentQuestionList =
             wrongAnswers.filter(item =>
 
-                item.subject === q.subject &&
                 item.section === "이론" &&
+                item.subject === q.subject &&
                 item.unit === q.unit
 
             );
@@ -1717,7 +1815,6 @@ function renderWrongQuestion(q) {
                 ${q.number}
             </div>
 
-
             <div class="question-text">
                 ${q.question}
             </div>
@@ -1725,7 +1822,10 @@ function renderWrongQuestion(q) {
     `;
 
 
+    // ====================================
     // 주관식
+    // ====================================
+
     if (
         q.type === "주관식" ||
         q.type === "short"
@@ -1755,7 +1855,10 @@ function renderWrongQuestion(q) {
 
     }
 
+    // ====================================
     // 객관식
+    // ====================================
+
     else {
 
         html += `
@@ -1799,8 +1902,7 @@ function renderWrongQuestion(q) {
     }
 
 
-    html +=
-        createWrongNavigationButtons();
+    html += createWrongNavigationButtons();
 
 
     html += `
