@@ -1116,33 +1116,63 @@ function answerSubjectiveQuestion(id) {
 
 function saveWrong(q) {
 
+    // 혹시라도 localStorage에 저장된 값이 이상하면 초기화
+    let savedWrongAnswers =
+        JSON.parse(
+            localStorage.getItem("wrongAnswers")
+        ) || [];
+
+    // 같은 문제인지 확인
     const exists =
-        wrongAnswers.some(
-            x => x.id === q.id
+        savedWrongAnswers.some(
+            item => String(item.id) === String(q.id)
         );
 
-
+    // 아직 오답에 없다면 추가
     if (!exists) {
 
-        wrongAnswers.push(q);
+        savedWrongAnswers.push(q);
 
         localStorage.setItem(
             "wrongAnswers",
-            JSON.stringify(
-                wrongAnswers
-            )
+            JSON.stringify(savedWrongAnswers)
+        );
+
+        // 현재 변수도 최신 상태로 갱신
+        wrongAnswers = savedWrongAnswers;
+
+        console.log(
+            "오답 저장 완료:",
+            q
+        );
+
+    }
+
+    else {
+
+        // 이미 저장되어 있는 경우
+        wrongAnswers = savedWrongAnswers;
+
+        console.log(
+            "이미 오답에 저장된 문제:",
+            q.id
         );
 
     }
 
 }
 
-
 // ========================================
 // 오답 화면
 // ========================================
 
 function showWrong() {
+
+    // 화면을 열 때마다 최신 localStorage를 다시 읽음
+    wrongAnswers =
+        JSON.parse(
+            localStorage.getItem("wrongAnswers")
+        ) || [];
 
     hideScreens();
 
@@ -1151,7 +1181,7 @@ function showWrong() {
         .classList
         .add("active");
 
-    showWrongMain();
+    showWrongSubjects();
 
 }
 
